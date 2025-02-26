@@ -15,6 +15,15 @@ h1 {
     text-align: center;
 }
 
+.instruction-tagline {
+    text-align: center;
+    color: #666;
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    padding: 0 20px;
+    line-height: 1.4;
+}
+
 .game-info {
     text-align: center;
     margin: 10px 0;
@@ -151,6 +160,12 @@ canvas {
     h1 {
         font-size: 24px;
         margin: 10px 0;
+    }
+
+    .instruction-tagline {
+        font-size: 14px;
+        margin: 0 0 10px 0;
+        padding: 0 15px;
     }
 
     .game-info {
