@@ -18,15 +18,16 @@ h1 {
 .instruction-tagline {
     text-align: center;
     color: #666;
-    margin: 0 0 15px 0;
+    margin: 0 0 10px 0;
     font-size: 16px;
     padding: 0 20px;
     line-height: 1.4;
+    font-style: italic;
 }
 
 .game-info {
     text-align: center;
-    margin: 10px 0;
+    margin: 5px 0;
     font-size: 18px;
 }
 
@@ -42,7 +43,7 @@ h1 {
 }
 
 .button-container {
-    margin: 15px 0;
+    margin: 10px 0;
     display: flex;
     gap: 10px;
     justify-content: center;
@@ -164,12 +165,14 @@ canvas {
 
     .instruction-tagline {
         font-size: 14px;
-        margin: 0 0 10px 0;
+        margin: 0 0 5px 0;
         padding: 0 15px;
+        font-style: italic;
     }
 
     .game-info {
         font-size: 16px;
+        margin: 3px 0;
     }
 
     .game-info span {
@@ -179,7 +182,7 @@ canvas {
     .button-container {
         flex-direction: column;
         padding: 0 10px;
-        margin: 10px 0;
+        margin: 8px 0;
     }
 
     .button-grid {
