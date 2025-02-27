@@ -30,13 +30,14 @@
         <h2>How to Play</h2>
         <div class="instruction-content">
             <div class="instruction-text">
-                <p>Transform the blue vector to reach the red point:</p>
+                <p>Think of the unit vectors (1,0), (0,1) as the basis for the standard xy plane</p>
                 <ol>
-                    <li>The blue point represents your starting vector</li>
-                    <li>The red point is your target</li>
-                    <li>Drag the green basis vectors (i' and j') to create a transformation</li>
-                    <li>Click "Go" to see where your transformation sends the blue point</li>
-                    <li>Try to make the transformed point (light blue) land on the red point!</li>
+                    <li>Your goal is to drag and drop the green basis vectors (i' and j') to apply a transformation on the grid that maps blue on to red</li>
+                    <li>It may be a rotation, reflection, or scaling, or all three </li>
+                    <li>i' corresponds to the x component of blue,  j' to the y component of blue, and together they form a transformation matrix </li>
+                    <li>Click "Go" to see how the current orientation transforms blue</li>
+                    <li>Click solve to see which apply the correct transormation (solution not unique)</li>
+                    <li>Try to make light blue (image) land on the red point</li>
                 </ol>
                 <div class="gif-container">
                     <img src="tutorial.gif" alt="How to play demonstration" class="tutorial-gif">
