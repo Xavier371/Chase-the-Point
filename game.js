@@ -14,6 +14,7 @@ let redPos = { x: GRID_SIZE - 1, y: 0 };
 let edges = [];
 let gameOver = false;
 let gameMode = 'offense'; // 'offense', 'defense', or 'twoPlayer'
+let redTurn = true; // Red always moves first
 
 function updateGameTitle() {
     const title = document.getElementById('gameTitle');
@@ -255,27 +256,51 @@ function handleMove(key) {
     if (gameOver) return;
 
     if (gameMode === 'twoPlayer') {
-        // Two-player mode logic
-        const oldPos = { ...redPos };
-        switch (key) {
-            case 'w': if (redPos.y > 0) redPos.y--; break;
-            case 's': if (redPos.y < GRID_SIZE - 1) redPos.y++; break;
-            case 'a': if (redPos.x > 0) redPos.x--; break;
-            case 'd': if (redPos.x < GRID_SIZE - 1) redPos.x++; break;
-            default: return;
-        }
+        if (redTurn) {
+            // Red's turn (WASD)
+            const oldPos = { ...redPos };
+            switch (key) {
+                case 'w': if (redPos.y > 0) redPos.y--; break;
+                case 's': if (redPos.y < GRID_SIZE - 1) redPos.y++; break;
+                case 'a': if (redPos.x > 0) redPos.x--; break;
+                case 'd': if (redPos.x < GRID_SIZE - 1) redPos.x++; break;
+                default: return;
+            }
 
-        if (canMove(oldPos, redPos)) {
-            removeRandomEdge();
-            if (checkGameOver()) {
-                drawGame();
-                return;
+            if (canMove(oldPos, redPos)) {
+                removeRandomEdge();
+                redTurn = false;  // Switch to blue's turn
+                if (checkGameOver()) {
+                    drawGame();
+                    return;
+                }
+            } else {
+                redPos = oldPos;
             }
         } else {
-            redPos = oldPos;
+            // Blue's turn (Arrow keys)
+            const oldPos = { ...bluePos };
+            switch (key) {
+                case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
+                case 'ArrowRight': if (bluePos.x < GRID_SIZE - 1) bluePos.x++; break;
+                case 'ArrowUp': if (bluePos.y > 0) bluePos.y--; break;
+                case 'ArrowDown': if (bluePos.y < GRID_SIZE - 1) bluePos.y++; break;
+                default: return;
+            }
+
+            if (canMove(oldPos, bluePos)) {
+                removeRandomEdge();
+                redTurn = true;  // Switch back to red's turn
+                if (checkGameOver()) {
+                    drawGame();
+                    return;
+                }
+            } else {
+                bluePos = oldPos;
+            }
         }
     } else {
-        // Single-player mode logic
+        // Single-player mode logic remains unchanged
         const oldPos = { ...bluePos };
         switch (key) {
             case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
@@ -287,19 +312,15 @@ function handleMove(key) {
 
         if (canMove(oldPos, bluePos)) {
             removeRandomEdge();
-            if (checkGameOver()) {
-                drawGame();
-                return;
+            if (!checkGameOver()) {
+                if (gameMode === 'offense') {
+                    moveRedEvade();
+                } else {
+                    moveRedAttack();
+                }
+                removeRandomEdge();
+                checkGameOver();
             }
-
-            // Immediate AI response
-            if (gameMode === 'offense') {
-                moveRedEvade();
-            } else { // defense mode
-                moveRedAttack();
-            }
-            removeRandomEdge();
-            checkGameOver();
         } else {
             bluePos = oldPos;
         }
@@ -308,29 +329,7 @@ function handleMove(key) {
     drawGame();
 }
 
-    // Handle blue's turn (player)
-    const oldPos = { ...bluePos };
-    switch (key) {
-        case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
-        case 'ArrowRight': if (bluePos.x < GRID_SIZE - 1) bluePos.x++; break;
-        case 'ArrowUp': if (bluePos.y > 0) bluePos.y--; break;
-        case 'ArrowDown': if (bluePos.y < GRID_SIZE - 1) bluePos.y++; break;
-        default: return;
-    }
-
-    if (canMove(oldPos, bluePos)) {
-        removeRandomEdge();
-        redTurn = true;
-        if (checkGameOver()) {
-            drawGame();
-            return;
-        }
-    } else {
-        bluePos = oldPos;
-    }
-    
-    drawGame();
-}
+// Update the event listener to handle both players' turns
 
 function toggleMode() {
     if (gameMode === 'offense') {
@@ -363,30 +362,13 @@ window.onclick = function(event) {
     }
 }
 
-function resetGame() {
-    gameOver = false;
-    document.getElementById('message').textContent = '';
-    initializeEdges();
-    initializePositions();
-    updateGameTitle();
-    
-    // Handle initial moves based on game mode
-    if (gameMode === 'offense') {
-        // In offense mode, red moves first and removes an edge
-        moveRedEvade();
-        removeRandomEdge();
-    }
-    // In defense mode, blue moves first with complete grid
-    // In two-player mode, red moves first using WASD
-    
-    drawGame();
-}
-// Event listeners
 document.addEventListener('keydown', (e) => {
     e.preventDefault();
     if (gameMode === 'twoPlayer') {
-        if (['w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
+        if (redTurn && ['w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
             handleMove(e.key.toLowerCase());
+        } else if (!redTurn && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            handleMove(e.key);
         }
     } else {
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
@@ -394,6 +376,17 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
+
+// Make sure redTurn is properly initialized in resetGame
+function resetGame() {
+    gameOver = false;
+    redTurn = true;  // Red always starts
+    document.getElementById('message').textContent = '';
+    initializeEdges();
+    initializePositions();
+    updateGameTitle();
+    drawGame();
+}
 
 // Initialize game
 resetGame();
