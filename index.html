@@ -1,60 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Transformation</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <title>Catch the Point</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    <h1>Interactive Transformation</h1>
-    <p class="instruction-tagline">Drag and drop the green arrows so that the blue point falls on the red</p>
-    <div class="game-info">
-        <span>Moves: <span id="moveCounter">0</span></span>
-        <span id="timer">Timer: 0 seconds</span>
-        <p id="winMessage"></p>
+    <div class="container">
+        <h1>Catch the Point</h1>
+        <div id="gameTitle" class="game-title">Try to catch the red point!</div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="controls">
+            <button onclick="resetGame()" class="game-button">Reset Game</button>
+            <button onclick="toggleMode()" id="modeBtn" class="game-button">Offense</button>
+            <button onclick="showInstructions()" class="game-button">How to Play</button>
+        </div>
+        <div id="message"></div>
     </div>
-    <div class="button-container mobile-button-grid">
-        <button id="howToPlayButton" class="full-width">How To Play</button>
-        <div class="button-grid">
-            <button id="goButton">Go</button>
-            <button id="resetButton">Reset</button>
-            <button id="pauseButton">Pause</button>
-            <button id="solveButton">Solve</button>
+
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <h2>How to Play</h2>
+            <p><strong>Controls:</strong></p>
+            <ul>
+                <li>Blue Point (Player 1): Arrow Keys</li>
+                <li>Red Point (Player 2): WASD Keys (Two-Player Mode)</li>
+            </ul>
+            <p><strong>Game Modes:</strong></p>
+            <ul>
+                <li>Offense Mode: Try to catch the red point! Red moves first and tries to escape.</li>
+                <li>Defense Mode: Try to escape from the red point! You move first, then red chases.</li>
+                <li>Two-Player Mode: Red uses WASD, Blue uses Arrows</li>
+            </ul>
+            <p><strong>Rules:</strong></p>
+            <ul>
+                <li>After each move, a random path disappears</li>
+                <li>Game ends when points connect or become separated</li>
+            </ul>
+            <p><strong>Strategy Tip:</strong> Plan your moves carefully! The disappearing edges can either help or hinder your progress.</p>
+            <button onclick="closeInstructions()" class="game-button">Close</button>
         </div>
     </div>
-    <canvas id="gameCanvas"></canvas>
-    <div id="instructionsOverlay" class="overlay">
-        <h2>How to Play</h2>
-        <div class="instruction-content">
-            <div class="instruction-text">
-                <p>Think of the unit vectors (1,0), (0,1) as the basis for the standard xy plane</p>
-                <ol>
-                    <li>Your goal is to drag and drop the green basis vectors (i' and j') to apply a transformation on the grid that maps blue on to red</li>
-                    <li>It may be a rotation, reflection, or scaling, or all three </li>
-                    <li>i' acts on the x component of blue and j' acts on the y component of blue, together they form a 2x2 matrix </li>
-                    <li>Click "Go" to see how the current orientation transforms the space</li>
-                    <li>Click solve to see the correct transormation (solution not unique)</li>
-                    <li>Try to make the light blue (image) vector land on the red point</li>
-                </ol>
-                <div class="gif-container">
-                    <img src="tutorial.gif" alt="How to play demonstration" class="tutorial-gif">
-                </div>
-            </div>
-        </div>
-        <button id="backToGameButton">Back to Game</button>
-    </div>
-    <div id="solutionOverlay" class="overlay">
-        <div id="equationContainer">
-            <div id="equation"></div>
-            <div id="equationText"></div>
-            <div id="solutionText"></div>
-            <div id="vectorMapping"></div>
-        </div>
-        <button id="backFromSolutionButton">Back to Game</button>
-    </div>
-    <script src="main.js"></script>
+
+    <script src="game.js"></script>
 </body>
 </html>
