@@ -54,9 +54,11 @@ canvas {
 #message {
     font-size: 24px;
     color: #333;
-    margin-top: 20px;
-    font-weight: bold;
+    margin: 10px 0 40px 0;  /* Increased bottom margin to 60px for much more space */
+    font-weight: normal;    /* Normal weight, not bold */
+    text-decoration: underline;  /* Added underline */
     text-align: center;
+    min-height: 36px;
 }
 
 .modal {
@@ -72,33 +74,51 @@ canvas {
 
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
+    margin: 2% auto;  /* Changed from 5% to 2% to position even higher */
+    padding: 30px;
     border: 1px solid #888;
     width: 80%;
     max-width: 600px;
     border-radius: 5px;
     position: relative;
     text-align: left;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 .modal-content h2 {
     color: #333;
     margin-top: 0;
     text-align: center;
+    font-size: 28px;
+    margin-bottom: 25px;
+}
+
+.modal-content h3 {
+    color: #4CAF50;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 20px;
 }
 
 .modal-content p {
     color: #666;
     line-height: 1.6;
+    font-size: 16px;
 }
 
 .modal-content ul {
     color: #666;
-    line-height: 1.6;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    padding-left: 25px;
+}
+
+.modal-content li {
+    margin-bottom: 8px;
+    font-size: 16px;
 }
 
 .modal-content button {
     display: block;
-    margin: 20px auto 0;
+    margin: 30px auto 0;
 }
