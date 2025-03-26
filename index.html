@@ -7,36 +7,45 @@
 <body>
     <div class="container">
         <h1>Catch the Point</h1>
-        <div id="gameTitle" class="game-title">Try to catch the red point!</div>
+        <div id="message"></div>
+        <div id="gameTitle" class="game-title"></div>
         <canvas id="gameCanvas"></canvas>
         <div class="controls">
             <button onclick="resetGame()" class="game-button">Reset Game</button>
             <button onclick="toggleMode()" id="modeBtn" class="game-button">Offense</button>
             <button onclick="showInstructions()" class="game-button">How to Play</button>
         </div>
-        <div id="message"></div>
     </div>
 
     <div id="instructionsModal" class="modal">
         <div class="modal-content">
             <h2>How to Play</h2>
-            <p><strong>Controls:</strong></p>
+            
+            <h3>Offense Mode</h3>
             <ul>
-                <li>Blue Point (Player 1): Arrow Keys</li>
-                <li>Red Point (Player 2): WASD Keys (Two-Player Mode)</li>
+                <li>You are the blue point, trying to capture the red point</li>
+                <li>Red will try to maintain distance and find escape routes</li>
             </ul>
-            <p><strong>Game Modes:</strong></p>
+
+            <h3>Defense Mode</h3>
             <ul>
-                <li>Offense Mode: Try to catch the red point! Red moves first and tries to escape.</li>
-                <li>Defense Mode: Try to escape from the red point! You move first, then red chases.</li>
-                <li>Two-Player Mode: Red uses WASD, Blue uses Arrows</li>
+                <li>You are the blue point, trying to evade the red point</li>
+                <li>Stay connected to multiple paths to avoid being trapped</li>
             </ul>
-            <p><strong>Rules:</strong></p>
+
+            <h3>Two Player Mode</h3>
             <ul>
-                <li>After each move, a random path disappears</li>
-                <li>Game ends when points connect or become separated</li>
+                <li>Red uses WASD, Blue uses arrow keys, Blue is chasing red</li>
+                <li>Take turns trying to catch or escape each other</li>
             </ul>
-            <p><strong>Strategy Tip:</strong> Plan your moves carefully! The disappearing edges can either help or hinder your progress.</p>
+
+            <h3>Game Basics</h3>
+            <ul>
+                <li>Each move removes one random edge</li>
+                <li>Win by either connecting points or completely separating them</li>
+                <li>Press Enter to restart anytime</li>
+            </ul>
+
             <button onclick="closeInstructions()" class="game-button">Close</button>
         </div>
     </div>
