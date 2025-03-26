@@ -54,7 +54,7 @@ canvas {
 #message {
     font-size: 24px;
     color: #333;
-    margin: 10px 0 40px 0;  /* Increased bottom margin to 60px for much more space */
+    margin: 10px 0 20px 0;  /* Increased bottom margin to 60px for much more space */
     font-weight: normal;    /* Normal weight, not bold */
     text-decoration: underline;  /* Added underline */
     text-align: center;
