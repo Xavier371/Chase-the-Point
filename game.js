@@ -285,15 +285,16 @@ function moveRedAttack() {
     return true;
 }
 
+
 function checkGameOver() {
     if (bluePos.x === redPos.x && bluePos.y === redPos.y) {
         gameOver = true;
         if (gameMode === 'offense') {
-            document.getElementById('message').textContent = 'Blue Wins - Points are joined!';
+            document.getElementById('message').textContent = 'Blue Wins - Points are joined';
         } else if (gameMode === 'defense') {
-            document.getElementById('message').textContent = 'Red Wins - Points are joined!';
+            document.getElementById('message').textContent = 'Red Wins - Points are joined';
         } else {
-            document.getElementById('message').textContent = 'Blue Wins - Points are joined!';
+            document.getElementById('message').textContent = 'Blue Wins - Points are joined';
         }
         return true;
     }
@@ -302,11 +303,11 @@ function checkGameOver() {
     if (!path) {
         gameOver = true;
         if (gameMode === 'offense') {
-            document.getElementById('message').textContent = 'Red Wins - Points are separated!';
+            document.getElementById('message').textContent = 'Red Wins - Points are separated';
         } else if (gameMode === 'defense') {
-            document.getElementById('message').textContent = 'Blue Wins - Points are separated!';
+            document.getElementById('message').textContent = 'Blue Wins - Points are separated';
         } else {
-            document.getElementById('message').textContent = 'Red Wins - Points are separated!';
+            document.getElementById('message').textContent = 'Red Wins - Points are separated';
         }
         return true;
     }
@@ -319,9 +320,9 @@ function handleMove(key) {
 
     if (gameMode === 'twoPlayer') {
         if (redTurn) {
-            // Red's turn (WASD)
+            // Red's turn (WASD only)
             const oldPos = { ...redPos };
-            switch (key) {
+            switch (key.toLowerCase()) {
                 case 'w': if (redPos.y > 0) redPos.y--; break;
                 case 's': if (redPos.y < GRID_SIZE - 1) redPos.y++; break;
                 case 'a': if (redPos.x > 0) redPos.x--; break;
@@ -331,7 +332,7 @@ function handleMove(key) {
 
             if (canMove(oldPos, redPos)) {
                 removeRandomEdge();
-                redTurn = false;  // Switch to blue's turn
+                redTurn = false;
                 if (checkGameOver()) {
                     drawGame();
                     return;
@@ -340,7 +341,7 @@ function handleMove(key) {
                 redPos = oldPos;
             }
         } else {
-            // Blue's turn (Arrow keys)
+            // Blue's turn (Arrow keys only)
             const oldPos = { ...bluePos };
             switch (key) {
                 case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
@@ -352,7 +353,7 @@ function handleMove(key) {
 
             if (canMove(oldPos, bluePos)) {
                 removeRandomEdge();
-                redTurn = true;  // Switch back to red's turn
+                redTurn = true;
                 if (checkGameOver()) {
                     drawGame();
                     return;
@@ -362,7 +363,7 @@ function handleMove(key) {
             }
         }
     } else {
-        // Single-player mode logic
+        // Single-player mode logic - Arrow keys only for blue
         const oldPos = { ...bluePos };
         switch (key) {
             case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
@@ -426,7 +427,6 @@ window.onclick = function(event) {
 document.addEventListener('keydown', (e) => {
     e.preventDefault();
     
-    // Add Enter key reset functionality
     if (e.key === 'Enter') {
         resetGame();
         return;
@@ -434,11 +434,12 @@ document.addEventListener('keydown', (e) => {
     
     if (gameMode === 'twoPlayer') {
         if (redTurn && ['w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
-            handleMove(e.key.toLowerCase());
+            handleMove(e.key);
         } else if (!redTurn && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             handleMove(e.key);
         }
     } else {
+        // Single player mode - only arrow keys
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             handleMove(e.key);
         }
