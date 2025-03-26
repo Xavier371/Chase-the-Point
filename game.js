@@ -19,11 +19,11 @@ let redTurn = true; // Red always moves first
 function updateGameTitle() {
     const title = document.getElementById('gameTitle');
     if (gameMode === 'offense') {
-        title.textContent = 'Try to catch the red point!';
+        title.innerHTML = 'You are the <span style="color: blue">blue</span> point, try to <i>catch</i> the <span style="color: red">red</span> point';
     } else if (gameMode === 'defense') {
-        title.textContent = 'Try to escape from the red point!';
+        title.innerHTML = 'You are the <span style="color: blue">blue</span> point, try to <i>evade</i> the <span style="color: red">red</span> point';
     } else {
-        title.textContent = 'Two Player Mode';
+        title.innerHTML = 'Two Player Mode';
     }
 }
 
@@ -34,11 +34,40 @@ function getRandomPosition() {
     };
 }
 
+// Modified to handle starting positions based on game mode
 function initializePositions() {
-    do {
-        bluePos = getRandomPosition();
-        redPos = getRandomPosition();
-    } while (getDistance(bluePos, redPos) < 3);
+    if (gameMode === 'offense') {
+        // Blue starts on left, red on right
+        bluePos = {
+            x: 0,
+            y: Math.floor(Math.random() * GRID_SIZE)
+        };
+        redPos = {
+            x: GRID_SIZE - 1,
+            y: Math.floor(Math.random() * GRID_SIZE)
+        };
+    } else if (gameMode === 'defense') {
+        // Blue starts on right, red on left
+        bluePos = {
+            x: GRID_SIZE - 1,
+            y: Math.floor(Math.random() * GRID_SIZE)
+        };
+        redPos = {
+            x: 0,
+            y: Math.floor(Math.random() * GRID_SIZE)
+        };
+    } else {
+        // Two player mode - also start on opposite sides
+        // Blue on left, red on right (like offense mode)
+        bluePos = {
+            x: 0,
+            y: Math.floor(Math.random() * GRID_SIZE)
+        };
+        redPos = {
+            x: GRID_SIZE - 1,
+            y: Math.floor(Math.random() * GRID_SIZE)
+        };
+    }
 }
 
 function initializeEdges() {
@@ -63,8 +92,42 @@ function initializeEdges() {
             });
         }
     }
+    // Remove two random edges at start
+    removeInitialEdges();
 }
 
+function removeInitialEdges() {
+    let internalEdges = edges.filter(edge => {
+        // Check if edge is internal (not on the border)
+        return !(edge.x1 === 0 || edge.x1 === GRID_SIZE - 1 || 
+                edge.x2 === 0 || edge.x2 === GRID_SIZE - 1 ||
+                edge.y1 === 0 || edge.y1 === GRID_SIZE - 1 || 
+                edge.y2 === 0 || edge.y2 === GRID_SIZE - 1);
+    });
+    
+    // Remove three random internal edges
+    for (let i = 0; i < 3; i++) {
+        if (internalEdges.length > 0) {
+            const randomIndex = Math.floor(Math.random() * internalEdges.length);
+            const selectedEdge = internalEdges[randomIndex];
+            
+            // Find and deactivate the edge in the main edges array
+            const mainEdgeIndex = edges.findIndex(edge => 
+                edge.x1 === selectedEdge.x1 && 
+                edge.y1 === selectedEdge.y1 && 
+                edge.x2 === selectedEdge.x2 && 
+                edge.y2 === selectedEdge.y2
+            );
+            
+            if (mainEdgeIndex !== -1) {
+                edges[mainEdgeIndex].active = false;
+            }
+            
+            // Remove the selected edge from internalEdges
+            internalEdges.splice(randomIndex, 1);
+        }
+    }
+}
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -186,7 +249,6 @@ function findShortestPath(start, end) {
     
     return null;
 }
-
 function moveRedEvade() {
     const validMoves = getValidMoves(redPos);
     if (validMoves.length === 0) return false;
@@ -300,7 +362,7 @@ function handleMove(key) {
             }
         }
     } else {
-        // Single-player mode logic remains unchanged
+        // Single-player mode logic
         const oldPos = { ...bluePos };
         switch (key) {
             case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
@@ -328,8 +390,6 @@ function handleMove(key) {
     
     drawGame();
 }
-
-// Update the event listener to handle both players' turns
 
 function toggleMode() {
     if (gameMode === 'offense') {
@@ -362,8 +422,16 @@ window.onclick = function(event) {
     }
 }
 
+// Updated event listener to include Enter key reset
 document.addEventListener('keydown', (e) => {
     e.preventDefault();
+    
+    // Add Enter key reset functionality
+    if (e.key === 'Enter') {
+        resetGame();
+        return;
+    }
+    
     if (gameMode === 'twoPlayer') {
         if (redTurn && ['w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
             handleMove(e.key.toLowerCase());
@@ -377,13 +445,17 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Make sure redTurn is properly initialized in resetGame
 function resetGame() {
     gameOver = false;
     redTurn = true;  // Red always starts
     document.getElementById('message').textContent = '';
+    
+    // Initialize edges first (includes removing two random edges)
     initializeEdges();
+    
+    // Initialize positions based on game mode
     initializePositions();
+    
     updateGameTitle();
     drawGame();
 }
