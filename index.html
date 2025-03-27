@@ -2,18 +2,35 @@
 <html>
 <head>
     <title>Catch the Point</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Catch the Point</h1>
-        <div id="gameTitle" class="game-title"></div>
-        <div id="message"></div>
-        <canvas id="gameCanvas"></canvas>
-        <div class="controls">
-            <button onclick="resetGame()" class="game-button">Reset Game</button>
-            <button onclick="toggleMode()" id="modeBtn" class="game-button">Offense</button>
-            <button onclick="showInstructions()" class="game-button">How to Play</button>
+        <div class="left-section">
+            <h1>Catch the Point</h1>
+            <div id="gameTitle" class="game-title"></div>
+            <div id="message"></div>
+        </div>
+        
+        <div class="center-section">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <div class="right-section">
+            <div class="controls">
+                <button onclick="resetGame()" class="game-button">Reset</button>
+                <button onclick="toggleMode()" id="modeBtn" class="game-button">Offense</button>
+                <button onclick="showInstructions()" class="game-button">Help</button>
+            </div>
+            <div id="mobileControls" class="mobile-controls">
+                <button class="mobile-btn up-btn"><span>↑</span></button>
+                <div class="middle-row">
+                    <button class="mobile-btn left-btn"><span>←</span></button>
+                    <button class="mobile-btn right-btn"><span>→</span></button>
+                </div>
+                <button class="mobile-btn down-btn"><span>↓</span></button>
+            </div>
         </div>
     </div>
 
@@ -35,7 +52,8 @@
 
             <h3>Two Player Mode</h3>
             <ul>
-                <li>Red uses WASD, Blue uses arrow keys, Blue is chasing red</li>
+                <li>On Desktop: Red uses WASD, Blue uses arrow keys</li>
+                <li>On Mobile: Buttons change color for current player's turn</li>
                 <li>Take turns trying to catch or escape each other</li>
             </ul>
 
@@ -43,7 +61,7 @@
             <ul>
                 <li>Each move removes one random edge</li>
                 <li>Win by either connecting points or completely separating them</li>
-                <li>Press Enter to restart anytime</li>
+                <li>Press Enter or Reset button to restart anytime</li>
             </ul>
 
             <button onclick="closeInstructions()" class="game-button">Close</button>
