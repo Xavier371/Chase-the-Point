@@ -249,40 +249,122 @@ function findShortestPath(start, end) {
     
     return null;
 }
-function moveRedEvade() {
+// Add these constants at the top with your other constants
+const ATTACK_FORCE = 1.5;
+const EVADE_FORCE = 1.2;
+
+function moveRedAttack() {
     const validMoves = getValidMoves(redPos);
     if (validMoves.length === 0) return false;
 
-    const isAdjacentToBlue = Math.abs(bluePos.x - redPos.x) + Math.abs(bluePos.y - redPos.y) === 1;
+    // Get all points two moves away from blue's position
+    const twoMovesFromBlue = [];
+    const blueNeighbors = getValidMoves(bluePos);
+    blueNeighbors.forEach(neighbor => {
+        const nextMoves = getValidMoves(neighbor);
+        nextMoves.forEach(move => {
+            if (!twoMovesFromBlue.some(p => p.x === move.x && p.y === move.y)) {
+                twoMovesFromBlue.push(move);
+            }
+        });
+    });
 
-    if (isAdjacentToBlue) {
-        const escapeMoves = validMoves.filter(move => 
-            Math.abs(move.x - bluePos.x) + Math.abs(move.y - bluePos.y) > 1
-        );
-        if (escapeMoves.length > 0) {
-            redPos = escapeMoves[Math.floor(Math.random() * escapeMoves.length)];
-            return true;
+    // Score each possible move
+    const scoredMoves = validMoves.map(move => {
+        // Base attraction force
+        const distance = Math.abs(move.x - bluePos.x) + Math.abs(move.y - bluePos.y);
+        let score = ATTACK_FORCE / (distance || 0.1);
+
+        // Bonus for being on a two-move path to blue
+        if (twoMovesFromBlue.some(p => p.x === move.x && p.y === move.y)) {
+            score += 2;
         }
-    }
 
-    // Score moves based on distance from blue
-    const scoredMoves = validMoves.map(move => ({
-        move,
-        score: Math.abs(move.x - bluePos.x) + Math.abs(move.y - bluePos.y)
-    }));
+        // Direct path bonus
+        const pathToBlue = findShortestPath(move, bluePos);
+        if (pathToBlue) {
+            score += 1 / pathToBlue.length;
+        }
 
+        return { move, score };
+    });
+
+    // Choose the move with highest score
     scoredMoves.sort((a, b) => b.score - a.score);
     redPos = scoredMoves[0].move;
     return true;
 }
 
-function moveRedAttack() {
-    const path = findShortestPath(redPos, bluePos);
-    if (!path || path.length < 2) return false;
-    
-    // Move one step along the shortest path
-    redPos = path[1];
+function moveRedEvade() {
+    const validMoves = getValidMoves(redPos);
+    if (validMoves.length === 0) return false;
+
+    // Score each possible move
+    const scoredMoves = validMoves.map(move => {
+        let score = 0;
+
+        // Base repulsion force (like same charge repulsion)
+        const distance = Math.abs(move.x - bluePos.x) + Math.abs(move.y - bluePos.y);
+        score += EVADE_FORCE * distance;
+
+        // Emergency escape if blue is adjacent
+        const isAdjacentToBlue = Math.abs(bluePos.x - move.x) + Math.abs(bluePos.y - move.y) === 1;
+        if (isAdjacentToBlue) {
+            score -= 10; // Strong penalty for being adjacent
+        }
+
+        // Check escape routes
+        const escapeRoutes = getValidMoves(move).length;
+        score += escapeRoutes * 2; // Strongly prefer positions with more escape routes
+
+        // Edge proximity bonus
+        if (move.x === 0 || move.x === GRID_SIZE - 1 || 
+            move.y === 0 || move.y === GRID_SIZE - 1) {
+            score += 3; // Bonus for being on an edge
+        }
+
+        // Check if move maintains path to border
+        const pathToBorder = findPathToBorder(move);
+        if (pathToBorder) {
+            score += 4; // Strong bonus for maintaining escape route to border
+        }
+
+        return { move, score };
+    });
+
+    // Choose the move with highest score
+    scoredMoves.sort((a, b) => b.score - a.score);
+    redPos = scoredMoves[0].move;
     return true;
+}
+
+// Helper function for evade
+function findPathToBorder(pos) {
+    const visited = new Set();
+    const queue = [[pos]];
+    
+    while (queue.length > 0) {
+        const path = queue.shift();
+        const current = path[path.length - 1];
+        
+        if (current.x === 0 || current.x === GRID_SIZE - 1 || 
+            current.y === 0 || current.y === GRID_SIZE - 1) {
+            return path;
+        }
+        
+        const key = `${current.x},${current.y}`;
+        if (visited.has(key)) continue;
+        
+        visited.add(key);
+        const moves = getValidMoves(current);
+        moves.forEach(move => {
+            if (!visited.has(`${move.x},${move.y}`)) {
+                queue.push([...path, move]);
+            }
+        });
+    }
+    
+    return null;
 }
 
 function isMobileDevice() {
