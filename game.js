@@ -304,7 +304,8 @@ function moveRedEvade() {
         let score = 0;
 
         // Base repulsion force (like same charge repulsion)
-        const distance = Math.abs(move.x - bluePos.x) + Math.abs(move.y - bluePos.y);
+        const path = findShortestPath(move, bluePos);
+        const distance = path ? path.length : 0.5;
         score += EVADE_FORCE * distance;
 
         // Emergency escape if blue is adjacent
