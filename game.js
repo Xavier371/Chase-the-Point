@@ -143,7 +143,6 @@ function drawGame() {
         }
     });
 
-    // Draw points
     const drawPoint = (pos, color) => {
         ctx.beginPath();
         ctx.arc(
@@ -160,9 +159,14 @@ function drawGame() {
         ctx.stroke();
     };
 
-    if (bluePos.x === redPos.x && bluePos.y === redPos.y) {
-        drawPoint(bluePos, '#8A2BE2'); // Purple when overlapping
+    if ((gameOver && document.getElementById('message').textContent.includes('Caught')) || 
+        (gameMode === 'twoPlayer' && bluePos.x === redPos.x && bluePos.y === redPos.y)) {
+        // Show purple point when:
+        // 1. Game ends by catching/crossing in single player modes
+        // 2. Points overlap in two player mode
+        drawPoint(gameMode === 'defense' ? redPos : bluePos, '#8A2BE2');
     } else {
+        // All other cases, show both points normally
         drawPoint(redPos, 'red');
         drawPoint(bluePos, 'blue');
     }
@@ -457,7 +461,11 @@ function handleMove(key) {
         // ✅ Check for normal or cross-path capture
         if (checkCrossPath(oldBlue, bluePos, oldRed, redPos)) {
             gameOver = true;
-            document.getElementById('message').textContent = 'Blue Wins - Caught Red!';
+            if (gameMode === 'defense') {
+                document.getElementById('message').textContent = 'Red Wins - Caught Blue!';
+            } else {
+                document.getElementById('message').textContent = 'Blue Wins - Caught Red!';
+            }
             drawGame();
             return;
         }
