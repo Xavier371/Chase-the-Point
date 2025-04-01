@@ -433,12 +433,58 @@ function checkGameOver() {
     return false;
 }
 
+let pendingBlueMove = null; // stores Blue's chosen move until Red finishes
+
 function handleMove(key) {
     if (gameOver) return;
 
-    if (gameMode === 'twoPlayer') {
+    // Only Blue picks manually in single-player mode
+    if (gameMode !== 'twoPlayer') {
+        if (!pendingBlueMove) {
+            // Step 1: Blue chooses
+            const oldPos = { ...bluePos };
+            switch (key) {
+                case 'ArrowLeft': if (bluePos.x > 0) pendingBlueMove = { x: bluePos.x - 1, y: bluePos.y }; break;
+                case 'ArrowRight': if (bluePos.x < GRID_SIZE - 1) pendingBlueMove = { x: bluePos.x + 1, y: bluePos.y }; break;
+                case 'ArrowUp': if (bluePos.y > 0) pendingBlueMove = { x: bluePos.x, y: bluePos.y - 1 }; break;
+                case 'ArrowDown': if (bluePos.y < GRID_SIZE - 1) pendingBlueMove = { x: bluePos.x, y: bluePos.y + 1 }; break;
+                default: return;
+            }
+
+            // Step 2: Validate Blue's intended move
+            if (!canMove(bluePos, pendingBlueMove)) {
+                pendingBlueMove = null; // cancel if illegal
+                return;
+            }
+
+            // Step 3: Red now plans its move (without actually moving)
+            if (gameMode === 'offense') {
+                moveRedEvade();
+            } else {
+                moveRedAttack();
+            }
+
+            // Step 4: Both move simultaneously
+            bluePos = pendingBlueMove;
+            pendingBlueMove = null;
+
+            // Step 5: Remove TWO random edges
+            removeRandomEdge();
+            removeRandomEdge();
+
+            // Step 6: Check for win/loss
+            if (checkGameOver()) {
+                drawGame();
+                return;
+            }
+
+            drawGame();
+
+        }
+
+    } else {
+        // --- TWO PLAYER MODE (optional) ---
         if (redTurn) {
-            // Red's turn (WASD only)
             const oldPos = { ...redPos };
             switch (key.toLowerCase()) {
                 case 'w': if (redPos.y > 0) redPos.y--; break;
@@ -447,19 +493,8 @@ function handleMove(key) {
                 case 'd': if (redPos.x < GRID_SIZE - 1) redPos.x++; break;
                 default: return;
             }
-
-            if (canMove(oldPos, redPos)) {
-                removeRandomEdge();
-                redTurn = false;
-                if (checkGameOver()) {
-                    drawGame();
-                    return;
-                }
-            } else {
-                redPos = oldPos;
-            }
+            if (!canMove(oldPos, redPos)) redPos = oldPos; else redTurn = false;
         } else {
-            // Blue's turn (Arrow keys only)
             const oldPos = { ...bluePos };
             switch (key) {
                 case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
@@ -468,47 +503,24 @@ function handleMove(key) {
                 case 'ArrowDown': if (bluePos.y < GRID_SIZE - 1) bluePos.y++; break;
                 default: return;
             }
-
-            if (canMove(oldPos, bluePos)) {
-                removeRandomEdge();
-                redTurn = true;
-                if (checkGameOver()) {
-                    drawGame();
-                    return;
-                }
-            } else {
+            if (!canMove(oldPos, bluePos)) {
                 bluePos = oldPos;
+            } else {
+                redTurn = true;
+                removeRandomEdge();
+                removeRandomEdge();
             }
-        }
-    } else {
-        // Single-player mode logic - Arrow keys only for blue
-        const oldPos = { ...bluePos };
-        switch (key) {
-            case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
-            case 'ArrowRight': if (bluePos.x < GRID_SIZE - 1) bluePos.x++; break;
-            case 'ArrowUp': if (bluePos.y > 0) bluePos.y--; break;
-            case 'ArrowDown': if (bluePos.y < GRID_SIZE - 1) bluePos.y++; break;
-            default: return;
         }
 
-        if (canMove(oldPos, bluePos)) {
-            removeRandomEdge();
-            if (!checkGameOver()) {
-                if (gameMode === 'offense') {
-                    moveRedEvade();
-                } else {
-                    moveRedAttack();
-                }
-                removeRandomEdge();
-                checkGameOver();
-            }
-        } else {
-            bluePos = oldPos;
+        if (checkGameOver()) {
+            drawGame();
+            return;
         }
+
+        drawGame();
     }
-    
-    drawGame();
 }
+
 
 function toggleMode() {
     if (gameMode === 'offense') {
