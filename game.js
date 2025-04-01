@@ -235,91 +235,108 @@ function findShortestPath(start, end) {
         const current = path[path.length - 1];
         const key = `${current.x},${current.y}`;
         
-        if (current.x === end.x && current.y === end.y) return path; // found it
+        if (current.x === end.x && current.y === end.y) return path;
         if (visited.has(key)) continue;
         
         visited.add(key);
         const moves = getValidMoves(current);
         moves.forEach(move => {
             if (!visited.has(`${move.x},${move.y}`)) {
-                queue.push([...path, move]); // grow the path by 1 step
+                queue.push([...path, move]);
             }
         });
     }
+    
     return null;
 }
-
 // Add these constants at the top with your other constants
-const ATTACK_FORCE = 2;
-const EVADE_FORCE = 3;
+const ATTACK_FORCE = 1.5;
+const EVADE_FORCE = 1.2;
 
-// Optimal: Red always takes the first step on the real shortest path
 function moveRedAttack() {
-    const path = findShortestPath(redPos, bluePos);
-    if (path && path.length >= 2) {
-        redPos = path[1];  // first step on the true shortest path
-        return true;
-    }
-    return false; // if stuck
-}
-
-
-function predictBlueMove() {
-    // Predict the first move Blue would take towards Red
-    const path = findShortestPath(bluePos, redPos);
-    if (path && path.length >= 2) {
-        return path[1]; // The first step Blue will likely take
-    }
-    return bluePos; // Fallback if no path
-}
-function moveRedEvade() {
     const validMoves = getValidMoves(redPos);
     if (validMoves.length === 0) return false;
 
-    const scoredMoves = validMoves.map(move => {
-        let score = 0;
-
-        // Distance after this move
-        const path = findShortestPath(move, bluePos);
-        const dist = path ? path.length : 0;
-        score += dist * 10;
-
-        // Immediate escape options
-        const escapeRoutes = getValidMoves(move).length;
-        score += escapeRoutes * 2;
-
-        // ---------- DEPTH 4 PLANNING ----------
-
-        // Sum of distances Red could achieve in the next 3 moves
-        let futureSum = 0;
-        const level1 = getValidMoves(move);
-        level1.forEach(pos1 => {
-            const level2 = getValidMoves(pos1);
-            level2.forEach(pos2 => {
-                const level3 = getValidMoves(pos2);
-                level3.forEach(pos3 => {
-                    const path3 = findShortestPath(pos3, bluePos);
-                    const d3 = path3 ? path3.length : 0;
-                    futureSum += d3;
-                });
-            });
+    // Get all points two moves away from blue's position
+    const twoMovesFromBlue = [];
+    const blueNeighbors = getValidMoves(bluePos);
+    blueNeighbors.forEach(neighbor => {
+        const nextMoves = getValidMoves(neighbor);
+        nextMoves.forEach(move => {
+            if (!twoMovesFromBlue.some(p => p.x === move.x && p.y === move.y)) {
+                twoMovesFromBlue.push(move);
+            }
         });
+    });
 
-        score += futureSum * 0.5; // tune this weight if needed
+    // Score each possible move
+    const scoredMoves = validMoves.map(move => {
+        // Base attraction force
+        const distance = Math.abs(move.x - bluePos.x) + Math.abs(move.y - bluePos.y);
+        let score = ATTACK_FORCE / (distance || 0.1);
 
-        // -------------------------------------
+        // Bonus for being on a two-move path to blue
+        if (twoMovesFromBlue.some(p => p.x === move.x && p.y === move.y)) {
+            score += 2;
+        }
+
+        // Direct path bonus
+        const pathToBlue = findShortestPath(move, bluePos);
+        if (pathToBlue) {
+            score += 1 / pathToBlue.length;
+        }
 
         return { move, score };
     });
 
+    // Choose the move with highest score
     scoredMoves.sort((a, b) => b.score - a.score);
     redPos = scoredMoves[0].move;
-
     return true;
 }
 
+function moveRedEvade() {
+    const validMoves = getValidMoves(redPos);
+    if (validMoves.length === 0) return false;
 
+    // Score each possible move
+    const scoredMoves = validMoves.map(move => {
+        let score = 0;
 
+        // Base repulsion force (like same charge repulsion)
+        const distance = Math.abs(move.x - bluePos.x) + Math.abs(move.y - bluePos.y);
+        score += EVADE_FORCE * distance;
+
+        // Emergency escape if blue is adjacent
+        const isAdjacentToBlue = Math.abs(bluePos.x - move.x) + Math.abs(bluePos.y - move.y) === 1;
+        if (isAdjacentToBlue) {
+            score -= 10; // Strong penalty for being adjacent
+        }
+
+        // Check escape routes
+        const escapeRoutes = getValidMoves(move).length;
+        score += escapeRoutes * 2; // Strongly prefer positions with more escape routes
+
+        // Edge proximity bonus
+        if (move.x === 0 || move.x === GRID_SIZE - 1 || 
+            move.y === 0 || move.y === GRID_SIZE - 1) {
+            score += 3; // Bonus for being on an edge
+        }
+
+        // Check if move maintains path to border
+        const pathToBorder = findPathToBorder(move);
+        if (pathToBorder) {
+            score += 4; // Strong bonus for maintaining escape route to border
+        }
+
+        return { move, score };
+    });
+
+    // Choose the move with highest score
+    scoredMoves.sort((a, b) => b.score - a.score);
+    redPos = scoredMoves[0].move;
+    return true;
+}
 
 // Helper function for evade
 function findPathToBorder(pos) {
@@ -433,58 +450,12 @@ function checkGameOver() {
     return false;
 }
 
-let pendingBlueMove = null; // stores Blue's chosen move until Red finishes
-
 function handleMove(key) {
     if (gameOver) return;
 
-    // Only Blue picks manually in single-player mode
-    if (gameMode !== 'twoPlayer') {
-        if (!pendingBlueMove) {
-            // Step 1: Blue chooses
-            const oldPos = { ...bluePos };
-            switch (key) {
-                case 'ArrowLeft': if (bluePos.x > 0) pendingBlueMove = { x: bluePos.x - 1, y: bluePos.y }; break;
-                case 'ArrowRight': if (bluePos.x < GRID_SIZE - 1) pendingBlueMove = { x: bluePos.x + 1, y: bluePos.y }; break;
-                case 'ArrowUp': if (bluePos.y > 0) pendingBlueMove = { x: bluePos.x, y: bluePos.y - 1 }; break;
-                case 'ArrowDown': if (bluePos.y < GRID_SIZE - 1) pendingBlueMove = { x: bluePos.x, y: bluePos.y + 1 }; break;
-                default: return;
-            }
-
-            // Step 2: Validate Blue's intended move
-            if (!canMove(bluePos, pendingBlueMove)) {
-                pendingBlueMove = null; // cancel if illegal
-                return;
-            }
-
-            // Step 3: Red now plans its move (without actually moving)
-            if (gameMode === 'offense') {
-                moveRedEvade();
-            } else {
-                moveRedAttack();
-            }
-
-            // Step 4: Both move simultaneously
-            bluePos = pendingBlueMove;
-            pendingBlueMove = null;
-
-            // Step 5: Remove TWO random edges
-            removeRandomEdge();
-            removeRandomEdge();
-
-            // Step 6: Check for win/loss
-            if (checkGameOver()) {
-                drawGame();
-                return;
-            }
-
-            drawGame();
-
-        }
-
-    } else {
-        // --- TWO PLAYER MODE (optional) ---
+    if (gameMode === 'twoPlayer') {
         if (redTurn) {
+            // Red's turn (WASD only)
             const oldPos = { ...redPos };
             switch (key.toLowerCase()) {
                 case 'w': if (redPos.y > 0) redPos.y--; break;
@@ -493,8 +464,19 @@ function handleMove(key) {
                 case 'd': if (redPos.x < GRID_SIZE - 1) redPos.x++; break;
                 default: return;
             }
-            if (!canMove(oldPos, redPos)) redPos = oldPos; else redTurn = false;
+
+            if (canMove(oldPos, redPos)) {
+                removeRandomEdge();
+                redTurn = false;
+                if (checkGameOver()) {
+                    drawGame();
+                    return;
+                }
+            } else {
+                redPos = oldPos;
+            }
         } else {
+            // Blue's turn (Arrow keys only)
             const oldPos = { ...bluePos };
             switch (key) {
                 case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
@@ -503,24 +485,47 @@ function handleMove(key) {
                 case 'ArrowDown': if (bluePos.y < GRID_SIZE - 1) bluePos.y++; break;
                 default: return;
             }
-            if (!canMove(oldPos, bluePos)) {
-                bluePos = oldPos;
-            } else {
+
+            if (canMove(oldPos, bluePos)) {
+                removeRandomEdge();
                 redTurn = true;
-                removeRandomEdge();
-                removeRandomEdge();
+                if (checkGameOver()) {
+                    drawGame();
+                    return;
+                }
+            } else {
+                bluePos = oldPos;
             }
         }
-
-        if (checkGameOver()) {
-            drawGame();
-            return;
+    } else {
+        // Single-player mode logic - Arrow keys only for blue
+        const oldPos = { ...bluePos };
+        switch (key) {
+            case 'ArrowLeft': if (bluePos.x > 0) bluePos.x--; break;
+            case 'ArrowRight': if (bluePos.x < GRID_SIZE - 1) bluePos.x++; break;
+            case 'ArrowUp': if (bluePos.y > 0) bluePos.y--; break;
+            case 'ArrowDown': if (bluePos.y < GRID_SIZE - 1) bluePos.y++; break;
+            default: return;
         }
 
-        drawGame();
+        if (canMove(oldPos, bluePos)) {
+            removeRandomEdge();
+            if (!checkGameOver()) {
+                if (gameMode === 'offense') {
+                    moveRedEvade();
+                } else {
+                    moveRedAttack();
+                }
+                removeRandomEdge();
+                checkGameOver();
+            }
+        } else {
+            bluePos = oldPos;
+        }
     }
+    
+    drawGame();
 }
-
 
 function toggleMode() {
     if (gameMode === 'offense') {
