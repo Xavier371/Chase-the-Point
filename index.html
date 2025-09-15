@@ -1,81 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Point Chase Game</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <style></style>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Point Chase Game</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div id="gameContainer" class="container">
-        <div class="left-section">
-            <h1>Catch the Point</h1>
-            <div id="gameTitle" class="game-title"></div>
-            <div id="message"></div>
-        </div>
-        
-        <div class="center-section">
-            <canvas id="gameCanvas"></canvas>
-        </div>
+  <!-- Portrait overlay -->
+  <div class="rotation-overlay">
+    <div class="phone-icon">📱</div>
+    <h1>Please Rotate Your Phone</h1>
+    <p>This game works best in landscape mode</p>
+  </div>
 
-        <div class="right-section">
-            <div class="controls">
-                <button onclick="resetGame()" class="game-button">Reset</button>
-                <button onclick="toggleMode()" id="modeBtn" class="game-button">Offense</button>
-                <button onclick="showInstructions()" class="game-button">Help</button>
-            </div>
-            <div id="mobileControls" class="mobile-controls">
-                <button class="mobile-btn up-btn"><span>↑</span></button>
-                <div class="middle-row">
-                    <button class="mobile-btn left-btn"><span>←</span></button>
-                    <button class="mobile-btn right-btn"><span>→</span></button>
-                </div>
-                <button class="mobile-btn down-btn"><span>↓</span></button>
-            </div>
-        </div>
+  <div id="gameContainer" class="container">
+    <div class="left-section">
+      <h1>Catch the Point</h1>
+      <div id="gameTitle" class="game-title"></div>
+      <div id="message"></div>
     </div>
 
-    <div id="instructionsModal" class="modal">
-        <div class="modal-content">
-            <h2>How to Play</h2>
-            
-            <h3>Offense Mode</h3>
-            <ul>
-                <li>You are the blue point, trying to capture the red point</li>
-                <li>Red will try to maintain distance and find escape routes</li>
-            </ul>
-
-            <h3>Defense Mode</h3>
-            <ul>
-                <li>You are the blue point, trying to evade the red point</li>
-                <li>Stay connected to multiple paths to avoid being trapped</li>
-            </ul>
-
-            <h3>Two Player Mode</h3>
-            <ul>
-                <li>On Desktop: Red uses WASD, Blue uses arrow keys</li>
-                <li>On Mobile: Buttons change color for current player's turn</li>
-                <li>Take turns trying to catch or escape each other</li>
-            </ul>
-
-            <h3>Game Basics</h3>
-            <ul>
-                <li>Each move removes one random edge</li>
-                <li>Win by either connecting points or completely separating them</li>
-                <li>Press Enter or Reset button to restart anytime</li>
-            </ul>
-
-            <button onclick="closeInstructions()" class="game-button">Close</button>
-        </div>
+    <div class="center-section">
+      <canvas id="gameCanvas"></canvas>
     </div>
 
-    <div class="rotation-overlay">
-        <div class="phone-icon">📱</div>
-        <h1>Please Rotate Your Phone</h1>
-        <p>This game works best in landscape mode</p>
-    </div>
+    <div class="right-section">
+      <!-- Top-right buttons (per your diagram) -->
+      <div class="controls">
+        <button onclick="resetGame()" class="game-button">Reset</button>
+        <button onclick="toggleMode()" id="modeBtn" class="game-button">Offense</button>
+        <button onclick="showInstructions()" class="game-button">Help</button>
+      </div>
 
-    <script src="game.js"></script>
+      <!-- Bottom-right D-pad (exact 3×3 grid) -->
+      <div id="mobileControls" class="mobile-controls dpad" aria-label="Mobile controls">
+        <!-- Row 1 -->
+        <div class="spacer"></div>
+        <button class="mobile-btn up-btn" aria-label="Up"></button>
+        <div class="spacer"></div>
+
+        <!-- Row 2 -->
+        <button class="mobile-btn left-btn" aria-label="Left"></button>
+        <div class="spacer"></div>
+        <button class="mobile-btn right-btn" aria-label="Right"></button>
+
+        <!-- Row 3 -->
+        <div class="spacer"></div>
+        <button class="mobile-btn down-btn" aria-label="Down"></button>
+        <div class="spacer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions Modal -->
+  <div id="instructionsModal" class="modal">
+    <div class="modal-content">
+      <h2>How to Play</h2>
+
+      <h3>Offense Mode</h3>
+      <ul>
+        <li>You are the blue point, trying to capture the red point</li>
+        <li>Red will try to maintain distance and find escape routes</li>
+      </ul>
+
+      <h3>Defense Mode</h3>
+      <ul>
+        <li>You are the blue point, trying to evade the red point</li>
+        <li>Stay connected to multiple paths to avoid being trapped</li>
+      </ul>
+
+      <h3>Two Player Mode</h3>
+      <ul>
+        <li>On Desktop: Red uses WASD, Blue uses arrow keys</li>
+        <li>On Mobile: Buttons change color for current player's turn</li>
+        <li>Take turns trying to catch or escape each other</li>
+      </ul>
+
+      <h3>Game Basics</h3>
+      <ul>
+        <li>Each move removes one random edge</li>
+        <li>Win by either connecting points or completely separating them</li>
+        <li>Press Enter or Reset button to restart anytime</li>
+      </ul>
+
+      <button onclick="closeInstructions()" class="game-button">Close</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
 </body>
-</html> 
+</html>
