@@ -14,10 +14,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
-    padding: 10px;
+    gap: 15px;
+    padding: 20px;
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
 }
 
 .left-section {
@@ -28,57 +28,78 @@ body {
 h1 {
     color: #333;
     margin: 0;
-    font-size: 28px;
+    font-size: 36px;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
 .game-title {
-    font-size: 20px;
+    font-size: 24px;
     color: #333;
-    margin: 5px 0;
+    margin: 15px 0;
+    font-weight: 500;
 }
 
 #message {
-    font-size: 20px;
+    font-size: 22px;
     color: #333;
-    margin: 5px 0;
+    margin: 15px 0;
     font-weight: normal;
     text-decoration: underline;
-    min-height: 24px;
+    min-height: 30px;
+    line-height: 1.4;
+}
+
+#message.blue-wins {
+    color: #1a365d;
+    font-weight: bold;
+}
+
+#message.red-wins {
+    color: #8B0000;
+    font-weight: bold;
 }
 
 .center-section {
     width: 100%;
     display: flex;
     justify-content: center;
+    margin: 10px 0;
 }
 
 canvas {
     background-color: white;
-    border: 2px solid #333;
-    border-radius: 5px;
-    margin: 5px 0;
+    border: 3px solid #333;
+    border-radius: 8px;
+    margin: 10px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .controls {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin: 5px 0;
+    gap: 15px;
+    margin: 20px 0;
 }
 
 .game-button {
-    background-color: #4CAF50;
+    background-color: #1a365d;
     color: white;
-    padding: 12px 24px;
+    padding: 16px 32px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    font-size: 18px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    letter-spacing: 0.5px;
 }
 
 .game-button:hover {
-    background-color: #45a049;
+    background-color: #2c5282;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
 }
 
 .mobile-controls {
@@ -90,31 +111,64 @@ canvas {
 }
 
 .mobile-btn {
-    width: 45px;
-    height: 45px;
-    transform: rotate(45deg);
+    width: 0;
+    height: 0;
     border: none;
-    background-color: #4169E1;
-    color: white;
-    font-size: 20px;
+    background: transparent !important;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    position: relative;
 }
 
 .mobile-btn:active {
-    transform: rotate(45deg) scale(0.95);
+    transform: scale(0.9);
 }
 
 .mobile-btn span {
-    transform: rotate(-45deg);
-    display: inline-block;
-    user-select: none;
+    display: none;
 }
+
+/* Triangle buttons positioned at edges of square */
+.up-btn {
+    border-left: 20px solid transparent !important;
+    border-right: 20px solid transparent !important;
+    border-bottom: 35px solid #1a365d !important;
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.up-btn:active { border-bottom-color: #2c5282 !important; }
+
+.down-btn {
+    border-left: 20px solid transparent !important;
+    border-right: 20px solid transparent !important;
+    border-top: 35px solid #1a365d !important;
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.down-btn:active { border-top-color: #2c5282 !important; }
+
+.left-btn {
+    border-top: 20px solid transparent !important;
+    border-bottom: 20px solid transparent !important;
+    border-right: 35px solid #1a365d !important;
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.left-btn:active { border-right-color: #2c5282 !important; }
+
+.right-btn {
+    border-top: 20px solid transparent !important;
+    border-bottom: 20px solid transparent !important;
+    border-left: 35px solid #1a365d !important;
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.right-btn:active { border-left-color: #2c5282 !important; }
 
 .middle-row {
     display: flex;
@@ -122,58 +176,39 @@ canvas {
     justify-content: center;
 }
 
+/* Phone rotation overlay */
+.rotation-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.rotation-overlay h1 { font-size: 24px; margin-bottom: 20px; text-align: center; }
+.rotation-overlay p  { font-size: 18px; text-align: center; margin: 0; }
+.phone-icon { font-size: 48px; margin-bottom: 20px; animation: rotate 2s linear infinite; }
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(90deg); } }
+
 /* Mobile Portrait Styles */
 @media (max-width: 768px) and (orientation: portrait) {
-    .container {
-        gap: 5px;
-        justify-content: flex-start;
-        height: 100vh;
-    }
-
-    h1 {
-        font-size: 24px;
-    }
-
-    .game-title {
-        font-size: 16px;
-    }
-
-    #message {
-        font-size: 16px;
-    }
-
-    canvas {
-        max-width: 95vw;
-        height: auto;
-        margin: 10px 0;
-    }
-
-    .controls {
-        margin: 8px 0 15px 0;
-    }
-
-    .game-button {
-        padding: 8px 16px;
-        font-size: 14px;
-    }
-
-    .mobile-controls {
-        display: flex;
-        margin-top: 5px;
-    }
-
-    .mobile-btn {
-        width: 40px;
-        height: 40px;
-    }
-
-    .middle-row {
-        gap: 40px;
-    }
+    .rotation-overlay { display: flex; }
+    #gameContainer { display: none; }
 }
 
 /* Mobile Landscape Styles */
 @media (max-width: 768px) and (orientation: landscape) {
+    .rotation-overlay { display: none; }
+    
     .container {
         flex-direction: row;
         justify-content: space-between;
@@ -194,89 +229,57 @@ canvas {
         padding: 0 10px;
     }
 
-    .left-section h1 {
-        margin-top: -20px;
-    }
+    .left-section h1 { font-size: 20px; font-weight: bold; margin: 0; margin-top: -30px; margin-bottom: 10px; }
+    .left-section .game-title { font-size: 14px; margin: 5px 0; }
+    .left-section #message { font-size: 14px; margin: 5px 0; margin-top: 10px; }
 
-    .left-section #message {
-        margin-top: 10px;
-    }
-
-    .center-section {
-        width: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+    .center-section { width: 50%; display: flex; align-items: center; justify-content: center; }
 
     .right-section {
         width: 25%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        align-items: center;
         height: 90%;
         padding: 0 10px;
     }
 
-    .controls {
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        margin-top: 25%;
-    }
+    .controls { display: flex; flex-direction: column; align-items: center; margin-bottom: 15%; gap: 20px; }
 
     .game-button {
-        padding: 8px 16px;
+        padding: 10px;
         font-size: 12px;
-        width: 80px;
-    }
-
-    .mobile-controls {
-        display: flex;
-        margin-bottom: 15%;
-    }
-
-    .mobile-btn {
-        width: 35px;
-        height: 35px;
-    }
-
-    .middle-row {
-        gap: 35px;
-    }
-
-    h1 {
-        font-size: 18px;
-        margin: 0;
-    }
-
-    .game-title {
-        font-size: 14px;
-        margin: 5px 0;
-    }
-
-    #message {
-        font-size: 14px;
-        margin: 5px 0;
-    }
-
-    canvas {
-        max-height: 90vh;
         width: auto;
+        border-radius: 5px;
+        background-color: #1a365d;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
+    .game-button:active { background-color: #2c5282; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+
+    .mobile-controls { display: flex; flex-direction: column; align-items: center; margin-bottom: 0; gap: 18px; }
+
+    .mobile-btn { width: 0; height: 0; border: none; background: transparent !important; cursor: pointer; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
+    .mobile-btn:active { transform: scale(0.9); }
+    .mobile-btn span { display: none; }
+
+    .middle-row { display: flex; gap: 36px; justify-content: center; }
+
+    /* FORCE smaller vertical triangles on phones */
+    .up-btn,
+    .down-btn { border-left: 15px solid transparent !important; border-right: 15px solid transparent !important; }
+    .up-btn   { border-bottom: 24px solid #1a365d !important; }
+    .down-btn { border-top:    24px solid #1a365d !important; }
+
+    canvas { max-height: 90vh; width: auto; background-color: white; border: 2px solid #333; border-radius: 5px; }
 }
 
 /* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.4);
-}
+.modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
 
 .modal-content {
     background-color: #fefefe;
@@ -293,54 +296,15 @@ canvas {
     overflow-y: auto;
 }
 
-.modal-content h2 {
-    color: #333;
-    margin-top: 0;
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
-.modal-content h3 {
-    color: #4CAF50;
-    margin-top: 15px;
-    margin-bottom: 8px;
-    font-size: 18px;
-}
-
-.modal-content ul {
-    color: #666;
-    line-height: 1.6;
-    margin-bottom: 15px;
-    padding-left: 25px;
-}
-
-.modal-content li {
-    margin-bottom: 6px;
-    font-size: 14px;
-}
-
-.modal-content button {
-    display: block;
-    margin: 20px auto 0;
-}
+.modal-content h2 { color: #333; margin-top: 0; text-align: center; font-size: 24px; margin-bottom: 20px; }
+.modal-content h3 { color: #1a365d; margin-top: 15px; margin-bottom: 8px; font-size: 18px; }
+.modal-content ul { color: #666; line-height: 1.6; margin-bottom: 15px; padding-left: 25px; }
+.modal-content li { margin-bottom: 6px; font-size: 14px; }
+.modal-content button { display: block; margin: 20px auto 0; }
 
 @media (max-width: 768px) {
-    .modal-content {
-        width: 90%;
-        margin: 5% auto;
-        padding: 15px;
-    }
-
-    .modal-content h2 {
-        font-size: 20px;
-    }
-
-    .modal-content h3 {
-        font-size: 16px;
-    }
-
-    .modal-content li {
-        font-size: 12px;
-    }
+    .modal-content { width: 90%; margin: 5% auto; padding: 15px; }
+    .modal-content h2 { font-size: 20px; }
+    .modal-content h3 { font-size: 16px; }
+    .modal-content li { font-size: 12px; }
 }
