@@ -36,37 +36,39 @@ function getRandomPosition() {
 
 // Modified to handle starting positions based on game mode
 function initializePositions() {
+    // Blue always starts on the left side (top-left or bottom-left corner)
+    const leftCorners = [
+        { x: 0, y: 0 },                    // top-left
+        { x: 0, y: GRID_SIZE - 1 }         // bottom-left
+    ];
+    
+    const blueCorner = leftCorners[Math.floor(Math.random() * leftCorners.length)];
+    
     if (gameMode === 'offense') {
-        // Blue starts on left, red on right
-        bluePos = {
-            x: 0,
-            y: Math.floor(Math.random() * GRID_SIZE)
-        };
-        redPos = {
-            x: GRID_SIZE - 1,
-            y: Math.floor(Math.random() * GRID_SIZE)
-        };
+        // Blue is attacker, starts in left corner
+        bluePos = blueCorner;
+        // Red (defender) starts on right side, same row or one adjacent
+        const defenderRow = Math.random() < 0.5 ? blueCorner.y : 
+                           (blueCorner.y === 0 ? 1 : blueCorner.y - 1);
+        redPos = { x: GRID_SIZE - 1, y: defenderRow };
     } else if (gameMode === 'defense') {
-        // Blue starts on right, red on left
-        bluePos = {
-            x: GRID_SIZE - 1,
-            y: Math.floor(Math.random() * GRID_SIZE)
-        };
-        redPos = {
-            x: 0,
-            y: Math.floor(Math.random() * GRID_SIZE)
-        };
+        // Red is attacker, starts in right corner
+        const rightCorners = [
+            { x: GRID_SIZE - 1, y: 0 },        // top-right
+            { x: GRID_SIZE - 1, y: GRID_SIZE - 1 } // bottom-right
+        ];
+        const redCorner = rightCorners[Math.floor(Math.random() * rightCorners.length)];
+        redPos = redCorner;
+        // Blue (defender) starts on left side, same row or one adjacent
+        const defenderRow = Math.random() < 0.5 ? redCorner.y : 
+                           (redCorner.y === 0 ? 1 : redCorner.y - 1);
+        bluePos = { x: 0, y: defenderRow };
     } else {
-        // Two player mode - also start on opposite sides
-        // Blue on left, red on right (like offense mode)
-        bluePos = {
-            x: 0,
-            y: Math.floor(Math.random() * GRID_SIZE)
-        };
-        redPos = {
-            x: GRID_SIZE - 1,
-            y: Math.floor(Math.random() * GRID_SIZE)
-        };
+        // Two player mode - blue on left, red on right
+        bluePos = blueCorner;
+        const defenderRow = Math.random() < 0.5 ? blueCorner.y : 
+                           (blueCorner.y === 0 ? 1 : blueCorner.y - 1);
+        redPos = { x: GRID_SIZE - 1, y: defenderRow };
     }
 }
 
@@ -105,8 +107,8 @@ function removeInitialEdges() {
                 edge.y2 === 0 || edge.y2 === GRID_SIZE - 1);
     });
     
-    // Remove three random internal edges
-    for (let i = 0; i < 3; i++) {
+    // Remove four random internal edges
+    for (let i = 0; i < 4; i++) {
         if (internalEdges.length > 0) {
             const randomIndex = Math.floor(Math.random() * internalEdges.length);
             const selectedEdge = internalEdges[randomIndex];
@@ -186,16 +188,7 @@ function isEdgeBetweenPoints(edge, pos1, pos2) {
 }
 
 function removeRandomEdge() {
-    const activeEdges = edges.filter(edge => {
-        if (!edge.active) return false;
-        // Don't remove edge between points if they're adjacent
-        if (getDistance(bluePos, redPos) === 1 && 
-            isEdgeBetweenPoints(edge, bluePos, redPos)) {
-            return false;
-        }
-        return true;
-    });
-
+    const activeEdges = edges.filter(edge => edge.active);
     if (activeEdges.length > 0) {
         const edge = activeEdges[Math.floor(Math.random() * activeEdges.length)];
         edge.active = false;
@@ -276,41 +269,110 @@ function moveRedAttack() {
     }
     return false; // Red is trapped
 }
+
+function evaluatePosition(pos, depth = 0, maxDepth = 2) {
+    // Base case: if we've reached max depth, just return the current path length
+    if (depth >= maxDepth) {
+        const path = findShortestPath(bluePos, pos);
+        return path ? path.length - 1 : 0;
+    }
+
+    // Calculate current path length
+    const currentPath = findShortestPath(bluePos, pos);
+    if (!currentPath) return 0; // If no path exists, this is a bad position
+    const currentMinMoves = currentPath.length - 1;
+
+    // Get all possible moves from this position
+    const validMoves = getValidMoves(pos);
+    if (validMoves.length === 0) return 0; // Dead end
+
+    // For each possible move, evaluate the best future position
+    let bestFutureMoves = 0;
+    for (const move of validMoves) {
+        // Recursively evaluate future positions
+        const futureMoves = evaluatePosition(move, depth + 1, maxDepth);
+        bestFutureMoves = Math.max(bestFutureMoves, futureMoves);
+    }
+
+    // Return the minimum of current moves and best future moves
+    return Math.min(currentMinMoves, bestFutureMoves);
+}
+
 function moveRedEvade() {
     const validMoves = getValidMoves(redPos);
     if (validMoves.length === 0) return false;
 
-    let bestMove = redPos;
-    let bestScore = -Infinity;
+    // Calculate current minimum path length
+    const currentPath = findShortestPath(bluePos, redPos);
+    if (!currentPath) return false; // If no path exists, we're trapped
+    const currentMinMoves = currentPath.length - 1;
 
-    validMoves.forEach(move => {
-        // Avoid immediate adjacency to Blue
-        if (Math.abs(move.x - bluePos.x) + Math.abs(move.y - bluePos.y) <= 1) return;
+    // Score each potential move
+    const scoredMoves = validMoves.map(move => {
+        // Calculate immediate path length
+        const pathToMove = findShortestPath(bluePos, move);
+        if (!pathToMove) return { move, score: -1 }; // Invalid move
+        const immediateMoves = pathToMove.length - 1;
 
-        // Predict where Blue could move next turn
-        const futureBlueMoves = getValidMoves(bluePos);
-        let minFutureDist = Infinity;
+        // Evaluate future positions
+        const futureMoves = evaluatePosition(move);
 
-        futureBlueMoves.forEach(blueMove => {
-            const futureDist = findShortestPath(blueMove, move)?.length || 0;
-            if (futureDist < minFutureDist) minFutureDist = futureDist;
-        });
+        // Calculate strategic value of the position
+        const futureValidMoves = getValidMoves(move);
+        const strategicValue = futureValidMoves.length;
 
-        // Score combines future distance and escape routes
-        let score = minFutureDist * 10;
+        // Score based on:
+        // 1. Immediate moves to catch (weighted highest)
+        // 2. Future moves to catch (weighted second)
+        // 3. Strategic value of the position (weighted lowest)
+        const score = (immediateMoves * 4) + (futureMoves * 3) + strategicValue;
 
-        // Escape route bonus
-        const escapeRoutes = getValidMoves(move).length;
-        score += escapeRoutes * 3;
+        return {
+            move,
+            score,
+            immediateMoves,
+            futureMoves,
+            strategicValue
+        };
+    }).filter(move => move.score >= 0); // Filter out invalid moves
 
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = move;
+    // Sort moves by score in descending order
+    scoredMoves.sort((a, b) => b.score - a.score);
+
+    // Find the best move that maximizes both immediate and future moves
+    let bestMove = null;
+    let bestScore = -1;
+
+    for (const scoredMove of scoredMoves) {
+        // Skip moves that lead to dead ends
+        if (getValidMoves(scoredMove.move).length === 0) continue;
+
+        // If this move increases or maintains our distance, it's a good candidate
+        if (scoredMove.immediateMoves >= currentMinMoves || 
+            scoredMove.futureMoves >= currentMinMoves) {
+            bestMove = scoredMove.move;
+            bestScore = scoredMove.score;
+            break;
         }
-    });
+    }
 
-    redPos = bestMove;
-    return true;
+    // If we found a good move, use it
+    if (bestMove) {
+        redPos = bestMove;
+        return true;
+    }
+
+    // If no move increases distance, use the one with the highest score
+    if (scoredMoves.length > 0) {
+        // Find the move with the highest immediate moves to catch
+        const bestScoredMove = scoredMoves.reduce((best, current) => 
+            current.immediateMoves > best.immediateMoves ? current : best
+        );
+        redPos = bestScoredMove.move;
+        return true;
+    }
+
+    return false;
 }
 
 // --- FINALIZED moveRedAttack() ---
@@ -375,6 +437,8 @@ function initializeMobileControls() {
     }
 }
 
+// Orientation lock removed. We render horizontally via CSS transforms on mobile.
+
 function updateMobileButtonColors() {
     if (!isMobileDevice()) return;
     
@@ -402,12 +466,16 @@ document.addEventListener('touchmove', function(e) {
 function checkGameOver() {
     if (bluePos.x === redPos.x && bluePos.y === redPos.y) {
         gameOver = true;
+        const messageEl = document.getElementById('message');
         if (gameMode === 'offense') {
-            document.getElementById('message').textContent = 'Blue Wins - Points are joined';
+            messageEl.textContent = 'Blue Wins - Points are joined';
+            messageEl.className = 'blue-wins';
         } else if (gameMode === 'defense') {
-            document.getElementById('message').textContent = 'Red Wins - Points are joined';
+            messageEl.textContent = 'Red Wins - Points are joined';
+            messageEl.className = 'red-wins';
         } else {
-            document.getElementById('message').textContent = 'Blue Wins - Points are joined';
+            messageEl.textContent = 'Blue Wins - Points are joined';
+            messageEl.className = 'blue-wins';
         }
         return true;
     }
@@ -415,12 +483,16 @@ function checkGameOver() {
     const path = findShortestPath(bluePos, redPos);
     if (!path) {
         gameOver = true;
+        const messageEl = document.getElementById('message');
         if (gameMode === 'offense') {
-            document.getElementById('message').textContent = 'Red Wins - Points are separated';
+            messageEl.textContent = 'Red Wins - Points are separated';
+            messageEl.className = 'red-wins';
         } else if (gameMode === 'defense') {
-            document.getElementById('message').textContent = 'Blue Wins - Points are separated';
+            messageEl.textContent = 'Blue Wins - Points are separated';
+            messageEl.className = 'blue-wins';
         } else {
-            document.getElementById('message').textContent = 'Red Wins - Points are separated';
+            messageEl.textContent = 'Red Wins - Points are separated';
+            messageEl.className = 'red-wins';
         }
         return true;
     }
@@ -458,18 +530,22 @@ function handleMove(key) {
         bluePos = proposedBlue;
         redPos = proposedRed;
 
-        // ✅ Check for normal or cross-path capture
+        // Check for capture
         if (checkCrossPath(oldBlue, bluePos, oldRed, redPos)) {
             gameOver = true;
+            const messageEl = document.getElementById('message');
             if (gameMode === 'defense') {
-                document.getElementById('message').textContent = 'Red Wins - Caught Blue!';
+                messageEl.textContent = 'Red Wins - Caught Blue!';
+                messageEl.className = 'red-wins';
             } else {
-                document.getElementById('message').textContent = 'Blue Wins - Caught Red!';
+                messageEl.textContent = 'Blue Wins - Caught Red!';
+                messageEl.className = 'blue-wins';
             }
             drawGame();
             return;
         }
 
+        // Remove two random edges after both players move
         removeRandomEdge();
         removeRandomEdge();
 
@@ -574,7 +650,9 @@ document.addEventListener('keydown', (e) => {
 function resetGame() {
     gameOver = false;
     redTurn = true;  // Red always starts
-    document.getElementById('message').textContent = '';
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = '';
+    messageEl.className = '';
     
     // Initialize edges first (includes removing two random edges)
     initializeEdges();
@@ -596,3 +674,5 @@ if (isMobileDevice()) {
     initializeMobileControls();
     updateMobileButtonColors();
 }
+
+// Orientation overlay and JS handling removed; CSS handles phone layout.
