@@ -1,6 +1,6 @@
 // ----- Config -----
 const GRID_SIZE = 6;
-const CELL_SIZE = 80;
+const CELL_SIZE = 70;
 const POINT_RADIUS = 8;
 const POINT_OFFSET = CELL_SIZE / 2;
 
