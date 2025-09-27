@@ -72,7 +72,7 @@ canvas {
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin: 10px 0;              /* moved up (was 20px) */
+  margin: 10px 0;
   flex-wrap: wrap;
 }
 .game-button {
@@ -120,7 +120,7 @@ canvas {
 .left-btn  { grid-column: 1; grid-row: 2; }
 .right-btn { grid-column: 3; grid-row: 2; }
 
-/* Triangles (slightly smaller) */
+/* Triangles */
 .up-btn {
   border-left: 22px solid transparent;
   border-right: 22px solid transparent;
@@ -213,9 +213,9 @@ canvas {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 0%;         /* moved to very top */
-    margin-top: -10px;         /* negative margin to push higher */
-    gap: 4px;                  /* extremely tight spacing */
+    margin-bottom: 0%;
+    margin-top: -10px;
+    gap: 4px;
   }
   .game-button {
     padding: 10px;
@@ -284,69 +284,34 @@ body.modal-open .mobile-controls {
   .modal-content li { font-size: 12px; }
 }
 
-/* ===== DESKTOP ONLY: fit everything on one screen ===== */
+/* ===== DESKTOP ONLY: shrink everything so it fits ===== */
 @media (min-width: 1025px) {
   body { overflow: hidden; }
   .container {
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     height: 100vh;
-    max-width: 1200px;
-    padding: 12px;
-    gap: 16px;
-    box-sizing: border-box;
+    padding: 8px;
+    gap: 8px;
+    max-width: 800px;
   }
-  .left-section {
-    width: 24%;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 12px;
-    padding: 0 8px;
-  }
-  .center-section {
-    width: 52%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .right-section {
-    width: 24%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    height: 100%;
-    padding: 0 8px;
-    box-sizing: border-box;
-    overflow: visible;
-  }
-  h1 { font-size: 28px; margin: 0; }
-  .game-title { font-size: 16px; margin: 6px 0; }
-  #message { font-size: 16px; margin: 6px 0; min-height: 22px; }
+  h1 { font-size: 28px; }
+  .game-title { font-size: 16px; }
+  #message { font-size: 16px; min-height: 20px; }
+
   canvas {
-    max-height: calc(100vh - 160px);
-    height: auto;
-    width: auto;
-    margin: 6px 0;
+    max-height: 70vh;
+    max-width: 70vw;
     border-width: 2px;
   }
   .controls {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
     gap: 8px;
-    margin: 0;
+    margin: 4px 0;
   }
   .game-button {
-    padding: 10px 14px;
+    padding: 8px 14px;
     font-size: 14px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   }
-  .mobile-controls { display: none !important; }
 }
