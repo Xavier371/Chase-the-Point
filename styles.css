@@ -283,3 +283,70 @@ body.modal-open .mobile-controls {
   .modal-content h3 { font-size: 16px; }
   .modal-content li { font-size: 12px; }
 }
+
+/* ===== DESKTOP ONLY: fit everything on one screen ===== */
+@media (min-width: 1025px) {
+  body { overflow: hidden; }
+  .container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    max-width: 1200px;
+    padding: 12px;
+    gap: 16px;
+    box-sizing: border-box;
+  }
+  .left-section {
+    width: 24%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 8px;
+  }
+  .center-section {
+    width: 52%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .right-section {
+    width: 24%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 100%;
+    padding: 0 8px;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+  h1 { font-size: 28px; margin: 0; }
+  .game-title { font-size: 16px; margin: 6px 0; }
+  #message { font-size: 16px; margin: 6px 0; min-height: 22px; }
+  canvas {
+    max-height: calc(100vh - 160px);
+    height: auto;
+    width: auto;
+    margin: 6px 0;
+    border-width: 2px;
+  }
+  .controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+  }
+  .game-button {
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .mobile-controls { display: none !important; }
+}
