@@ -237,14 +237,16 @@ function initializeMobileControls() {
 }
 
 function updateMobileButtonColors() {
-  if (!isMobileDevice()) return;
-  const buttons = document.querySelectorAll('.mobile-btn');
-  if (gameMode === 'twoPlayer') {
-    const color = redTurn ? '#FF4444' : '#4169E1';
-    buttons.forEach(b => { b.style.backgroundColor = color; });
-  } else {
-    buttons.forEach(b => { b.style.backgroundColor = '#4169E1'; });
-  }
+  const color = (gameMode === 'twoPlayer' && redTurn) ? '#FF4444' : '#4169E1';
+  // Triangle buttons are drawn with CSS borders, so we must update border colors.
+  const upBtn    = document.querySelector('.up-btn');
+  const downBtn  = document.querySelector('.down-btn');
+  const leftBtn  = document.querySelector('.left-btn');
+  const rightBtn = document.querySelector('.right-btn');
+  if (upBtn)    upBtn.style.borderBottomColor  = color;
+  if (downBtn)  downBtn.style.borderTopColor   = color;
+  if (leftBtn)  leftBtn.style.borderRightColor = color;
+  if (rightBtn) rightBtn.style.borderLeftColor = color;
 }
 
 // Prevent pinch-zoom gesture from causing layout shifts
@@ -393,6 +395,19 @@ function resetGame() {
   updateMobileButtonColors();
 }
 
-// Boot
+// Boot — always initialize touch controls so D-pad works on any touch device
+// (CSS media queries handle showing/hiding the D-pad element)
+let mobileControlsInitialized = false;
+function ensureMobileControls() {
+  if (!mobileControlsInitialized) {
+    initializeMobileControls();
+    mobileControlsInitialized = true;
+  }
+  updateMobileButtonColors();
+}
+
 resetGame();
-if (isMobileDevice()) { initializeMobileControls(); updateMobileButtonColors(); }
+ensureMobileControls();
+
+// Re-check on resize (e.g. rotating from landscape to portrait)
+window.addEventListener('resize', () => { ensureMobileControls(); });
