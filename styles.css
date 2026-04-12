@@ -7,6 +7,7 @@ body {
   background-color: #f0f0f0;
   font-family: Arial, sans-serif;
   touch-action: manipulation;
+  min-height: 100vh;
   min-height: 100svh;
   display: flex;
   justify-content: center;
@@ -170,8 +171,78 @@ canvas {
 
 /* ===================== MEDIA QUERIES ===================== */
 @media (max-width: 768px) and (orientation: portrait) {
-  .rotation-overlay { display: flex; }
-  #gameContainer { display: none; }
+  .rotation-overlay { display: none; }
+
+  body {
+    align-items: flex-start;
+    overflow-y: auto;
+    min-height: 100svh;
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 8px;
+    gap: 8px;
+    height: auto;
+    max-width: 100%;
+  }
+
+  .left-section {
+    width: 100%;
+    padding: 0;
+  }
+
+  h1 { font-size: 22px; margin: 4px 0; }
+  .game-title { font-size: 13px; margin: 3px 0; }
+  #message { font-size: 13px; margin: 3px 0; min-height: 18px; }
+
+  .center-section {
+    width: 100%;
+    margin: 4px 0;
+    justify-content: center;
+  }
+
+  canvas {
+    max-width: min(90vw, 75vmin);
+    height: auto;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .right-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    overflow: visible;
+  }
+
+  .controls {
+    flex-direction: row;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .game-button {
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+
+  .mobile-controls {
+    display: grid !important;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(3, auto);
+    place-items: center;
+    gap: 14px;
+    margin: 6px auto 10px;
+    transform: none;
+  }
 }
 @media (max-width: 1024px) and (orientation: landscape) {
   .rotation-overlay { display: none; }
@@ -179,6 +250,7 @@ canvas {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    height: 100vh;
     height: 100svh;
     padding: 10px;
     gap: 10px;
