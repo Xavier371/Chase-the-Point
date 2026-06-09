@@ -309,7 +309,8 @@ body.modal-open .mobile-controls { pointer-events: none; opacity: 0.4; }
     padding: 10px 8px;
     font-size: clamp(12px, 3.5vw, 15px);
     min-height: 44px;
-    border-radius: 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
     white-space: nowrap;
     text-align: center;
   }
@@ -391,9 +392,9 @@ body.modal-open .mobile-controls { pointer-events: none; opacity: 0.4; }
     font-size: clamp(10px, 1.9vw, 13px);
     min-height: clamp(28px, 7vh, 40px);
     width: 100%;
-    border-radius: 8px;
-    letter-spacing: 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    border-radius: 5px;
+    letter-spacing: 0.4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     white-space: nowrap;
     text-align: center;
   }
@@ -469,7 +470,8 @@ body.modal-open .mobile-controls { pointer-events: none; opacity: 0.4; }
     font-size: clamp(12px, 1.6vw, 15px);
     min-height: clamp(38px, 6vh, 52px);
     width: 100%;
-    border-radius: 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
     white-space: nowrap;
     text-align: center;
   }
