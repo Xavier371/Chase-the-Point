@@ -386,7 +386,7 @@ body.modal-open .mobile-controls { pointer-events: none; opacity: 0.4; }
     width: 26%; flex-shrink: 0;
     display: flex; flex-direction: column;
     justify-content: center; align-items: center;
-    gap: clamp(6px, 1.6vh, 14px);
+    gap: clamp(14px, 3.2vh, 24px);
     padding: 4px 6px; box-sizing: border-box;
     overflow: hidden;
   }
@@ -415,9 +415,9 @@ body.modal-open .mobile-controls { pointer-events: none; opacity: 0.4; }
     gap: clamp(3px, 0.7vh, 6px);
   }
   .mobile-btn {
-    width:  clamp(26px, 7vh, 40px);
-    height: clamp(26px, 7vh, 40px);
-    font-size: clamp(10px, 3vh, 16px);
+    width:  clamp(32px, 9vh, 48px);
+    height: clamp(32px, 9vh, 48px);
+    font-size: clamp(13px, 3.8vh, 20px);
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   }
